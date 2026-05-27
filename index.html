@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <title>Audio Loop Player</title>
+  </head>
+  <body>
+    <main id="app">
+      <section class="player-card">
+        <header class="header">
+          <div>
+            <p class="eyebrow">Mobile Web Audio Player</p>
+            <h1>Audio Loop Player</h1>
+          </div>
+          <span class="loop-badge">∞ Loop</span>
+        </header>
+
+        <section class="now-playing-box">
+          <p class="label">Now playing</p>
+          <p id="nowPlaying" class="now-playing">None</p>
+        </section>
+
+        <section class="progress-section">
+          <div class="timer-row">
+            <span id="currentTime">00:00</span>
+            <span id="totalTime">00:00</span>
+          </div>
+          <input id="progressSlider" class="progress-slider" type="range" min="0" max="1" value="0" step="0.01" />
+          <p id="selectedTotal" class="selected-total">Selected total length: 00:00</p>
+        </section>
+
+        <section class="controls">
+          <button id="playPauseBtn" class="primary-btn" type="button">Play</button>
+          <button id="stopBtn" class="secondary-btn" type="button">Stop</button>
+        </section>
+
+        <section class="selection-actions">
+          <button id="selectAllBtn" type="button">Select All</button>
+          <button id="deselectAllBtn" type="button">Deselect All</button>
+        </section>
+
+        <section class="playlist-section">
+          <div class="playlist-header">
+            <h2>Audio files</h2>
+            <p>Ticked files play in ascending order.</p>
+          </div>
+          <div id="playlist" class="playlist"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
