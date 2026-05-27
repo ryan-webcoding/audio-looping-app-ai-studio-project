@@ -33,7 +33,8 @@ const state = {
   status: "stopped", // stopped | playing | paused
   isDragging: false,
   desiredPosition: 0,
-  playRequestId: 0
+  playRequestId: 0,
+  playbackRate: 1.0
 };
 
 const elements = {
@@ -46,6 +47,8 @@ const elements = {
   stopBtn: document.querySelector("#stopBtn"),
   selectAllBtn: document.querySelector("#selectAllBtn"),
   deselectAllBtn: document.querySelector("#deselectAllBtn"),
+  speedInput: document.querySelector("#speedInput"),
+  speedStatus: document.querySelector("#speedStatus"),
   playlist: document.querySelector("#playlist")
 };
 
@@ -57,6 +60,11 @@ function formatTime(seconds) {
   const minutes = Math.floor(safeSeconds / 60);
   const secs = safeSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function formatSpeed(value) {
+  const rounded = Math.round(value * 100) / 100;
+  return Number.isInteger(rounded) ? `${rounded.toFixed(1)}x` : `${rounded}x`;
 }
 
 function getSelectedPlaylist() {
@@ -129,6 +137,57 @@ function updateRangeFill() {
   elements.progressSlider.style.setProperty("--progress", `${percent}%`);
 }
 
+function applyPlaybackRate() {
+  audio.playbackRate = state.playbackRate;
+  audio.defaultPlaybackRate = state.playbackRate;
+}
+
+function parseSpeedInput(value) {
+  const parsed = Number.parseFloat(value);
+
+  if (Number.isNaN(parsed)) {
+    return null;
+  }
+
+  return parsed;
+}
+
+function cleanSpeedForDisplay(value) {
+  return String(value.toFixed(2).replace(/\.00$/, ".0").replace(/0$/, ""));
+}
+
+function setPlaybackRateFromInput({ forceClamp = false } = {}) {
+  const parsed = parseSpeedInput(elements.speedInput.value);
+
+  if (parsed === null) {
+    elements.speedStatus.textContent = "Please enter a speed between 0.1 and 2.0.";
+
+    if (forceClamp) {
+      elements.speedInput.value = cleanSpeedForDisplay(state.playbackRate);
+    }
+
+    return;
+  }
+
+  if (parsed < 0.1 || parsed > 2.0) {
+    elements.speedStatus.textContent = "Speed must be between 0.1 and 2.0.";
+
+    if (!forceClamp) {
+      return;
+    }
+  }
+
+  const nextRate = Math.round(clamp(parsed, 0.1, 2.0) * 100) / 100;
+  state.playbackRate = nextRate;
+  applyPlaybackRate();
+
+  if (forceClamp || document.activeElement !== elements.speedInput) {
+    elements.speedInput.value = cleanSpeedForDisplay(state.playbackRate);
+  }
+
+  render();
+}
+
 function renderStaticPlaylist() {
   elements.playlist.innerHTML = "";
 
@@ -185,7 +244,11 @@ function render() {
 
   elements.currentTime.textContent = formatTime(currentPosition);
   elements.totalTime.textContent = formatTime(total);
-  elements.selectedTotal.textContent = `Selected total length: ${formatTime(total)}`;
+  elements.selectedTotal.textContent = `Selected audio length: ${formatTime(total)} · At ${formatSpeed(state.playbackRate)}: ${formatTime(total / state.playbackRate)}`;
+  if (document.activeElement !== elements.speedInput) {
+    elements.speedInput.value = cleanSpeedForDisplay(state.playbackRate);
+  }
+  elements.speedStatus.textContent = `Current speed: ${formatSpeed(state.playbackRate)}`;
   elements.playPauseBtn.textContent = state.status === "playing" ? "Pause" : "Play";
 
   if (state.currentFile && state.status !== "stopped") {
@@ -224,6 +287,8 @@ function setAudioSource(file, offset, shouldPlay) {
       // Some browsers delay seekability until slightly later.
     }
 
+    applyPlaybackRate();
+
     if (shouldPlay) {
       audio.play()
         .then(() => {
@@ -243,6 +308,7 @@ function setAudioSource(file, offset, shouldPlay) {
   };
 
   audio.src = file.src;
+  applyPlaybackRate();
   audio.load();
 
   if (audio.readyState >= 1) {
@@ -331,6 +397,7 @@ function playPause() {
   }
 
   if (state.status === "paused") {
+    applyPlaybackRate();
     audio.play()
       .then(() => {
         state.status = "playing";
@@ -462,6 +529,13 @@ elements.playPauseBtn.addEventListener("click", playPause);
 elements.stopBtn.addEventListener("click", stop);
 elements.selectAllBtn.addEventListener("click", selectAll);
 elements.deselectAllBtn.addEventListener("click", deselectAll);
+elements.speedInput.addEventListener("input", () => setPlaybackRateFromInput());
+elements.speedInput.addEventListener("change", () => setPlaybackRateFromInput({ forceClamp: true }));
+elements.speedInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    elements.speedInput.blur();
+  }
+});
 
 elements.progressSlider.addEventListener("input", () => {
   state.isDragging = true;
@@ -494,5 +568,6 @@ setInterval(() => {
   }
 }, 250);
 
+applyPlaybackRate();
 renderStaticPlaylist();
 render();

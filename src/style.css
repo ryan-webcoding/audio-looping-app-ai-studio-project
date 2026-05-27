@@ -91,6 +91,7 @@ h1 {
 
 .now-playing-box,
 .progress-section,
+.speed-section,
 .playlist-section {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -114,6 +115,50 @@ h1 {
 
 .progress-section {
   margin-top: 14px;
+}
+
+.speed-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.speed-status {
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 850;
+}
+
+.speed-input-wrap {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 118px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 16px;
+  background: white;
+  color: #111827;
+  font-weight: 900;
+}
+
+.speed-input {
+  width: 70px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #111827;
+  font-weight: 900;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.speed-input::-webkit-outer-spin-button,
+.speed-input::-webkit-inner-spin-button {
+  opacity: 1;
 }
 
 .timer-row {
@@ -304,6 +349,16 @@ h1 {
 
   .header {
     align-items: center;
+  }
+
+  .speed-section {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .speed-input-wrap {
+    justify-content: flex-end;
+    width: 100%;
   }
 
   .playlist-header {

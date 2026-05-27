@@ -10,6 +10,7 @@ A small mobile-friendly web audio player for the included MP3 files.
 - If the currently playing file is unticked, playback restarts from the beginning of the selected list
 - Progress slider with drag-to-seek
 - Timer showing current position and selected total length
+- Playback speed input from `0.1x` to `2.0x`; changes immediately while audio is playing
 - Hard-coded audio list for simple GitHub and Vercel deployment
 
 ## Local run
